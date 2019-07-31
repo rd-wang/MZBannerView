@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +47,7 @@ public class RemoteTestFragment extends Fragment implements View.OnClickListener
         mMZBannerView = (MZBannerView) view.findViewById(R.id.my_banner);
         mBtnChange = (TextView) view.findViewById(R.id.btn_change);
         mBtnChange.setOnClickListener(this);
+        view.findViewById(R.id.btn_clear).setOnClickListener(this);
         mMovieLoader = new MovieLoader();
         getMovieList();
         return view;
@@ -83,6 +85,22 @@ public class RemoteTestFragment extends Fragment implements View.OnClickListener
     }
 
     private void setBanner(List<Movie> movies){
+        mMZBannerView.addPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Log.e("zw","onPageScrolled---->"+position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
         mMZBannerView.setPages(movies, new MZHolderCreator<BannerViewHolder>() {
             @Override
             public BannerViewHolder createViewHolder() {
@@ -107,7 +125,19 @@ public class RemoteTestFragment extends Fragment implements View.OnClickListener
             List movies = new ArrayList(mMovies);
             movies.add(mMovies.get(0));
             movies.add(mMovies.get(1));
+            if(movies.size()>2){
+                mMZBannerView.setCanLoop(true);
+            }else{
+                mMZBannerView.setCanLoop(false);
+            }
             setBanner(movies);
+        }else if(v.getId() == R.id.btn_clear){
+            List<Movie> movies = new ArrayList<>();
+            movies.add(mMovies.get(0));
+            movies.add(mMovies.get(1));
+            mMZBannerView.setCanLoop(false);
+            setBanner(movies);
+
         }
     }
 

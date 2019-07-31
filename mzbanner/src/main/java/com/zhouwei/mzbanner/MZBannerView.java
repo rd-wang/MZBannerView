@@ -258,11 +258,11 @@ public class MZBannerView<T> extends RelativeLayout {
                 float touchX = ev.getRawX();
                 // 如果是魅族模式，去除两边的区域
                 if(touchX >= paddingLeft && touchX < getScreenWidth(getContext()) - paddingLeft){
-                    mIsAutoPlay = false;
+                    pause();
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                mIsAutoPlay = true;
+                start();
                 break;
         }
         return super.dispatchTouchEvent(ev);
@@ -288,6 +288,7 @@ public class MZBannerView<T> extends RelativeLayout {
             return;
         }
         if(mIsCanLoop){
+            pause();
             mIsAutoPlay = true;
             mHandler.postDelayed(mLoopRunnable,mDelayedTime);
         }
@@ -302,6 +303,17 @@ public class MZBannerView<T> extends RelativeLayout {
     }
 
     /**
+     * 设置是否可以轮播
+     * @param canLoop
+     */
+    public void setCanLoop(boolean canLoop){
+        mIsCanLoop = canLoop;
+        if(!canLoop){
+            pause();
+        }
+    }
+
+    /**
      * 设置BannerView 的切换时间间隔
      * @param delayedTime
      */
@@ -309,7 +321,7 @@ public class MZBannerView<T> extends RelativeLayout {
         mDelayedTime = delayedTime;
     }
 
-    public void addPageChangeLisnter(ViewPager.OnPageChangeListener onPageChangeListener){
+    public void addPageChangeListener(ViewPager.OnPageChangeListener onPageChangeListener){
         mOnPageChangeListener = onPageChangeListener;
     }
 
@@ -401,7 +413,7 @@ public class MZBannerView<T> extends RelativeLayout {
         mAdapter.setPageClickListener(mBannerPageClickListener);
 
 
-
+        mViewPager.clearOnPageChangeListeners();
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -426,7 +438,7 @@ public class MZBannerView<T> extends RelativeLayout {
                         mIndicators.get(i).setImageResource(mIndicatorRes[0]);
                     }
                 }
-                  // 不能直接将mOnPageChangeListener 设置给ViewPager ,否则拿到的position 是原始的positon
+                  // 不能直接将mOnPageChangeListener 设置给ViewPager ,否则拿到的position 是原始的position
                  if(mOnPageChangeListener!=null){
                      mOnPageChangeListener.onPageSelected(realSelectPosition);
                   }
@@ -546,6 +558,9 @@ public class MZBannerView<T> extends RelativeLayout {
         }
 
         private int getStartSelectItem(){
+            if(getRealCount() == 0){
+                return 0;
+            }
             // 我们设置当前选中的位置为Integer.MAX_VALUE / 2,这样开始就能往左滑动
             // 但是要保证这个值与getRealPosition 的 余数为0，因为要从第一页开始显示
             int currentItem = getRealCount() * mLooperCountFactor / 2;
